@@ -16,10 +16,19 @@ struct Estado
 	Transicao transicao[2]{};
 	bool inicial = false;
 	bool final = false;
+	
+	string returnPos_Estado(string valor_lido) {
+		for (size_t i = 0; i < 2; i++)
+		{
+			if (valor_lido == transicao[i].valor_Lido) {
+				return transicao[i].pos_Estado;
+			}
+		}
+	}
 };
 
 void line(char simbolo = '-', int tam = 34);
-bool checkCadeia(Estado * estados [], char cadeia[]);
+bool checkCadeia(Estado* estados[], string& cadeia, int & quantEst);
 
 int main() {
 	system("chcp 1252 > nul");
@@ -146,17 +155,59 @@ int main() {
 
 	line('=', 82);
 
-	cout << "Agora vamos testar com entradas seu autômato!" << endl;
-	cout << "Case queira parar, digite \"0\" ZERO!\n" << endl;
+	cout << "Agora vamos testar com entradas do seu autômato!" << endl;
+	cout << "Case queira parar, apenas pressione \"Enter\"\n" << endl;
+	string cadeia;
 	do
 	{
+		line();
+		cout << "Cadeia: ";
+		cin >> cadeia;
+		bool result = checkCadeia(&estados, cadeia, quantEst);
+		if (result == true) {
+			cout << "Cadeia é aceita pelo autômato!" << endl;
+		}
+		else {
+			cout << "Cadeia não é aceita pelo autômato!" << endl;
+		}
+		line();
+	} while (cadeia != "");
 
-	} while (true);
+	delete[] estados;
 
 	return 0;
 }
 
-bool checkCadeia(Estado* estados [], char cadeia[]) {
+bool checkCadeia(Estado* estados [], string& cadeia, int & quantEst) {
+	Estado estadoAtual;
+	int index = 0;
+
+	int tamanho = cadeia.size();
+	string* vetorStrings = new string[tamanho];
+
+	// Preenche o array de strings
+	for (int i = 0; i < tamanho; ++i) {
+		vetorStrings[i] = cadeia[i];
+	}
+
+	for (size_t i = 0; i < cadeia.size(); i++)
+	{
+		estadoAtual.nome = estados[index]->returnPos_Estado(vetorStrings[i]);
+		for (size_t c = 0; c < quantEst; c++)
+		{
+			if (estadoAtual.nome == estados[c]->nome) {
+				estadoAtual = *estados[c];
+				index = c;
+				break;
+			}
+		}
+	}
+
+	if (estadoAtual.final == true) {
+		return true;
+	}
+
+	delete[] vetorStrings;
 
 	return false;
 }
