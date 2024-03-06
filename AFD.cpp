@@ -17,7 +17,7 @@ struct Estado
 	bool inicial = false;
 	bool final = false;
 	
-	string returnPos_Estado(string valor_lido) {
+	const string returnPos_Estado(string valor_lido) {
 		for (size_t i = 0; i < 2; i++)
 		{
 			if (valor_lido == transicao[i].valor_Lido) {
@@ -28,7 +28,7 @@ struct Estado
 };
 
 void line(char simbolo = '-', int tam = 34);
-bool checkCadeia(Estado* estados[], string& cadeia, int & quantEst);
+bool checkCadeia(Estado * estados[], string& cadeia, int& quantEst);
 
 int main() {
 	system("chcp 1252 > nul");
@@ -126,24 +126,22 @@ int main() {
 
 		if (check1 == false) {
 			line();
-			cout << "Estado inexistente, tente novamente!";
+			cout << "Estado inexistente, tente novamente!" << endl;
 			line();
 		}
 
 	} while (check1 == false);
 
-	//////////////////////////////////////////////////////////////////////////////////////
-
 	line();
 
 	cout << "Agora informa quais estados são finais!\n" << endl;
 
-	string final{};
+	string final;
 
 	for (size_t i = 0; i < quantEst; i++)
 	{
 		check1 = false;
-		cout << estados[i].nome << " é estado final? (true = sim | false = não): " << endl;
+		cout << "Estado final " << i + 1 << ": ";
 		cin >> final;
 
 		std::transform(final.begin(), final.end(), final.begin(), [](unsigned char c) { return std::tolower(c); });
@@ -170,7 +168,6 @@ int main() {
 		else {
 			cout << "Cadeia não é aceita pelo autômato!" << endl;
 		}
-		line();
 	} while (cadeia != "");
 
 	delete[] estados;
@@ -178,36 +175,37 @@ int main() {
 	return 0;
 }
 
-bool checkCadeia(Estado* estados [], string& cadeia, int & quantEst) {
+bool checkCadeia(Estado* estados[], string & cadeia, int & quantEst) {
 	Estado estadoAtual;
 	int index = 0;
+	int tamanho = cadeia.length();
 
-	int tamanho = cadeia.size();
-	string* vetorStrings = new string[tamanho];
+	for (int i = 0; i < tamanho; i++) {
+		string valorLido = cadeia.substr(i, 1); // Lê um caractere da cadeia
 
-	// Preenche o array de strings
-	for (int i = 0; i < tamanho; ++i) {
-		vetorStrings[i] = cadeia[i];
-	}
+		estadoAtual.nome = (*estados)[index].returnPos_Estado(valorLido);
 
-	for (size_t i = 0; i < cadeia.size(); i++)
-	{
-		estadoAtual.nome = estados[index]->returnPos_Estado(vetorStrings[i]);
-		for (size_t c = 0; c < quantEst; c++)
-		{
-			if (estadoAtual.nome == estados[c]->nome) {
-				estadoAtual = *estados[c];
-				index = c;
+		// Encontra o próximo estado com o valor lido
+		bool transicaoEncontrada = false;
+		for (int c = 0; c < quantEst; c++) {
+			if (estadoAtual.nome == (*estados)[c].nome) {
+				estadoAtual = (*estados)[c];
+				index = c; // Atualiza o índice para o próximo estado
+				transicaoEncontrada = true;
 				break;
 			}
 		}
+
+		// Se não houver transição para o próximo estado, a cadeia é rejeitada
+		if (!transicaoEncontrada) {
+			return false;
+		}
 	}
 
-	if (estadoAtual.final == true) {
+	// Verifica se o estado atual é final
+	if (estadoAtual.final) {
 		return true;
 	}
-
-	delete[] vetorStrings;
 
 	return false;
 }
